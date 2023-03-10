@@ -32,3 +32,8 @@ This function calculates and classifies the eigenvalues of the Jacobian matrix o
 This function plots the stable (green) and unstable (red) equilibria.
 ## “func_SOLVE5eq_var4_Tdip.m”:
 This function returns the system five equations for finding the solutions/equilibria of the system.
+
+## “Model_derivation.nb”:
+This Mathematica code shows the complete derivation of the model equations for non-dimensionalized position and orientation of both the fish.
+## “Governing_equations.nb”:
+This Mathematica code contains the five governing equations of the dynamical system and some manipulations to determine the terms in the form expressed in the manuscript.  
