@@ -14,35 +14,71 @@ tol5 = 0.8; % angle tol for ST
 tol6 = 0.2; % angle tol for WF 
 % When doing for rho=0 case, remove ialph=1 values!
 
-fdir = './files1Td_v6_fine2/';
+alpharr = [0.0:0.005:0.16 0.16+0.02:0.02:1.0]; 
+lamarr = [0.0:0.01:1.5 1.5+0.02:0.02:3.0];
+[Alph,Lam] = meshgrid(alpharr,lamarr);
 
-fdir2 = [fdir 'om/'];
+flagmesh = zeros(size(Alph));
+Nalph1 = size(0.0:0.005:0.16,2); Nalph2 = size(0.16+0.02:0.02:1.0,2);
+Nlam1 = size(0.0:0.01:1.5,2); Nlam2 = size(1.5+0.02:0.02:3.0,2);
+Nlam = Nlam1+Nlam2; Nalph = Nalph1+Nalph2;
+flagmesh(1:Nlam1,1:Nalph1) = 1; % Folder Roots3
+flagmesh(Nlam1+1:Nlam,1:Nalph1) = 2; % Folder Roots3b
+flagmesh(1:Nlam1,Nalph1+1:Nalph) = 3; % Folder Roots3c
+
+om1 = nan(Nlam,Nalph);om2 = nan(Nlam,Nalph);
+
+% Folder Roots
+lamarr_coarse = 0.0:0.02:3.0; Nlam_coarse = size(lamarr_coarse,2);
+alpharr_coarse = 0.0:0.02:1.0; Nalph_coarse = size(alpharr_coarse,2);
+Nlam1_coarse = size(0:0.02:1.5,2); Nalph1_coarse = size(0:0.02:0.16,2);
+
+fdir = './files1Td_v6_fine2/';
+fdirB = './../MATLAB_CODES/files1Td_v6_fine2/';
+
+% Read in parameters from one of the roots files
+ilam = 1; ialph = 1; 
+fdir1 = [fdir 'Roots3/'];
+fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
+filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph, '.mat');
+load(filename);
+
+fdir2 = [fdir 'om_fine/'];
 if exist(fdir2, 'dir')==0
     mkdir(fdir2);
 end
 fname = sprintf('%s%s_%s_%s_%s', fdir2, 'w1w2_rho', rhostr, 'K', Kstr);
 
-% Read in parameters from one of the roots files
-ilam = 1; ialph = 1; 
-fdir1 = [fdir 'Roots/'];
-fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
-filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph, '.mat');
-load(filename);
-
-lamarr = 0.0:0.02:3.0; Nlam = size(lamarr,2);
-alpharr = 0.0:0.02:1.0; Nalph = size(alpharr,2);
-[Alph,Lam] = meshgrid(alpharr,lamarr);
-om1 = nan(Nlam,Nalph);om2 = nan(Nlam,Nalph);
 
 %%
 for ilam = 1:Nlam
     for ialph = 2:Nalph
-%         disp(ialph)
+        disp(ialph)
         l = Lam(ilam,ialph); lam = l;
         a = Alph(ilam,ialph);
 
-        filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph, '.mat');
+%         filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph, '.mat');
+%         load(filename);
+        if (flagmesh(ilam,ialph)==1)
+            fdir1 = [fdir 'Roots3/'];
+            fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
+            filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph, '.mat');
+        elseif (flagmesh(ilam,ialph)==2)
+            fdir1 = [fdir 'Roots3b/'];
+            fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
+            filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam-Nlam1, 'ialph', ialph, '.mat');
+        elseif (flagmesh(ilam,ialph)==3)
+            fdir1 = [fdir 'Roots3c/'];
+            fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
+            filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam, 'ialph', ialph-Nalph1, '.mat');
+        else
+            fdir1 = [fdirB 'Roots/'];
+            ilam_coarse = find(abs(lamarr_coarse-l)<1e-5); ialph_coarse = find(abs(alpharr_coarse-a)<1e-5);
+            fname1 = sprintf('%s%s_%s_%s_%s', fdir1, 'Roots_rho', rhostr, 'K', Kstr);
+            filename = sprintf('%s_%s%d_%s%d%s',fname1,'ilam', ilam_coarse, 'ialph', ialph_coarse, '.mat');
+        end
         load(filename);
+
 
         if (isempty(Roots3))
             continue;

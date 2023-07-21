@@ -1,4 +1,4 @@
-function maxlines = plot_lines(X,al,type,dis)
+function maxlines = plot_lines2(X,al,type,dis)
 % X is the 2D array of all scatter points (:,ialph)
 % each column is for a particular alpha
 % al is the 1D array of alpha values
@@ -69,11 +69,15 @@ function maxlines = plot_lines(X,al,type,dis)
     end
     Xlines(Xlines==0)=nan;
 
-    if (type>0)
+    if (type==0) % Marg stable
         for i=1:maxlines
             plot(al,Xlines(i,:),'-g'); hold on;
         end
-    else
+    elseif (type>0) % Asymp stable
+        for i=1:maxlines
+            plot(al,Xlines(i,:),"Color",[0 0.5 0]); hold on;
+        end
+    else % Unstable
         for i=1:maxlines
             plot(al,Xlines(i,:),'-r'); hold on;
         end

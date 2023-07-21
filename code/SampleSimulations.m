@@ -15,25 +15,36 @@ global alpha k rho  psi kappap kappav kappas
 %non dimensional parameters
 k=0; % lateral line gain
 rho=0.1; %dipole length
-alpha=0.4; %flow speed/fish speed ratio
+alpha=0.2; %flow speed/fish speed ratio
 psi=1; % self propulsion ratio v02/v01
 kappap= 0; %0.03 attraction gain
 kappav=0; %0.558 alignment gain
 kappas=0; %alignment gain due to surroundings
 
+time_sim=50;
+
 %% Initial conditions: 
 
-lambda0 = 1.0; %inter-fish distance (stream-wise)
-zi10=0.00+0.02*randn(1); %cross-stream coordinates
-zi20=-0.00+0.02*randn(1);
-thetaf10=pi+0.04*randn(1); %heading anglese
-thetaf20=pi+0.04*randn(1);
+% lambda0 = 0.2; %inter-fish distance (stream-wise)
+% zi10=0.00+0.02*randn(1); %cross-stream coordinates
+% zi20=-0.00+0.02*randn(1);
+% thetaf10=pi+0.04*randn(1); %heading anglese
+% thetaf20=pi+0.04*randn(1);
+% y0 = [zi10 zi20 lambda0 thetaf10 thetaf20]'; %(5x1 vector with intial contidions)
 
-y0 = [zi10 zi20 lambda0 thetaf10 thetaf20]'; %(5x1 vector with intial contidions)
+Root = [0.1178   -0.1178   -3.0372   -3.0372    0.2000]';
+y0 = Root; 
+y0(3) = Root(5); y0(4) = wrapTo2Pi(Root(3)); y0(5)=wrapTo2Pi(Root(4));
+equil = y0;
+% y0 = y0 + [0.02*randn(1); 0.02*randn(1); 0.0; 0.04*randn(1); 0.04*randn(1)];
+y0 = y0 + [0.05*randn(1); 0.05*randn(1); 0.0; 0.1*randn(1); 0.1*randn(1)];
+% y0 = y0 + [0.1*randn(1); 0.1*randn(1); 0.0; 0.1*randn(1); 0.1*randn(1)];
+y0-equil
+pause(1)
 
 %% ODE INTEGRATION using ode113 (better for non-linear systems)
 
-tf=100; dt = 0.001; % time of integration (can be changed)
+tf=time_sim; dt = 0.001; % time of integration (can be changed)
 tspan = [0 tf]; 
 tstart = tic;
 tarr = 0:dt:tf;
@@ -57,24 +68,35 @@ else
 end
 
 %% Plot
-figure;
-plot(t,y(:,1),'r',t,y(:,2),'b','LineWidth',1.5);
-xlabel('Time (s)','FontSize', 20),ylabel('\xi','FontSize', 20);
-legend('\xi_1','\xi_2');
-ylim([-0.5 0.5]);pbaspect([1.65 1 1])
-
-figure;
-plot(t,y(:,4),'r',t,y(:,5),'b','LineWidth',1.5);
-xlabel('Time (s)','FontSize', 20),ylabel('\theta','FontSize', 20);
-legend('\theta_1','\theta_2');
-ylim([pi/2 3*pi/2]); 
-yticks([pi/2 pi 3*pi/2]); yticklabels({'\pi/2','\pi','3\pi/2'});
-pbaspect([1.65 1 1]);
-
 figure; %stream-wise
-plot(t,y(:,3),'b','LineWidth',1.5)
+plot(t,y(:,3),'b','LineWidth',1.5); hold on;
+plot(t,equil(3)*ones(size(t)),'--r','LineWidth',1.2);
 xlabel('Time (s)','FontSize', 20),ylabel('\Lambda','FontSize', 20)
 pbaspect([1.65 1 1])
+f.Position = [30 100 450 320]; %[left bottom width height];
+
+f=figure;
+subplot(1,2,1);
+plot(t,y(:,1),'r',t,y(:,2),'b','LineWidth',1.5);hold on;
+plot(t,equil(1)*ones(size(t)),'-.r',t,equil(2)*ones(size(t)),'--b','LineWidth',1.2); 
+xlabel('Time (s)','FontSize', 20),ylabel('\xi','FontSize', 20);
+legend('\xi_1','\xi_2','','');
+ylim([-0.5 0.5]);pbaspect([1.65 1 1]);
+xlim([0 time_sim]);
+
+subplot(1,2,2);
+% plot(t,(y(:,4)),'r',t,(y(:,5)),'b','LineWidth',1.5);hold on;
+plot(t,(y(:,4)),'r',t,wrapTo2Pi(y(:,5)),'b','LineWidth',1.5);hold on;
+plot(t,equil(4)*ones(size(t)),'-.r',t,equil(5)*ones(size(t)),'--b','LineWidth',1.2);
+xlabel('Time (s)','FontSize', 20),ylabel('\theta','FontSize', 20);
+legend('\theta_1','\theta_2','','');
+% ylim([pi/2 3*pi/2]); yticks([pi/2 pi 3*pi/2]); yticklabels({'\pi/2','\pi','3\pi/2'});
+ylim([0 2*pi]); yticks([0 pi/2 pi 3*pi/2 2*pi]); yticklabels({'0','\pi/2','\pi','3\pi/2','2\pi'});
+pbaspect([1.65 1 1]);
+xlim([0 time_sim]);
+
+f.Position = [100 100 850 300]; %[left bottom width height];
+
 
 
 
